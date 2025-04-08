@@ -1,0 +1,59 @@
+﻿@page "/product"
+@using Newtonsoft.Json
+@using Northwind.Client.ViewModels
+@inject HttpClient HttpClient
+
+@if (ProductViewModel == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <section class="container">
+        <h2>Product Info</h2>
+        <div class="info">
+            <p><strong>Name:</strong> @ProductViewModel.ProductName</p>
+            <p><strong>Category ID:</strong> @ProductViewModel.CategoryId</p>
+            <p><strong>Category Name:</strong> @ProductViewModel.CategoryName</p>
+            <p><strong>Supplier ID:</strong> @ProductViewModel.SupplierId</p>
+            <p><strong>Quantity Per Unit:</strong> @ProductViewModel.QuantityPerUnit</p>
+            <p><strong>Unit Price:</strong> @ProductViewModel.UnitPrice</p>
+            <p><strong>Units In Stock:</strong> @ProductViewModel.UnitsInStock</p>
+            <p><strong>Units On Order:</strong> @ProductViewModel.UnitsOnOrder</p>
+            <p><strong>Reorder Level:</strong> @ProductViewModel.ReorderLevel</p>
+            <p><strong>Discontinued:</strong> @ProductViewModel.Discontinued</p>
+        </div>
+    </section>
+}
+
+
+
+@code {
+
+    public ProductViewModel? ProductViewModel { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var id = 1;
+        var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7079/api/Product/{id}");
+        try
+        {
+            using (var response = await HttpClient.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+
+                ProductViewModel = JsonConvert.DeserializeObject<ProductViewModel>(body);
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.Message.ToString();
+        }
+    }
+
+
+
+
+}

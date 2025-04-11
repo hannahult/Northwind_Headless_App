@@ -1,0 +1,193 @@
+﻿@page "/create-product"
+@using Northwind.Client.ViewModels
+@inject HttpClient HttpClient
+
+<section class="create-product-form">
+    <h2>Skapa ny produkt</h2>
+
+    <EditForm Model="NewProduct" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="validation-summary" />
+
+        <div class="form-group">
+            <label>Produktnamn:</label>
+            <InputText @bind-Value="NewProduct.ProductName" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label>Kategori:</label>
+            <select @bind="NewProduct.CategoryId" class="input">
+                <option value="">-- Välj kategori --</option>
+                @foreach (var category in Categories)
+                {
+                    <option value="@category.CategoryId">@category.CategoryName</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Leverantör:</label>
+            <select @bind="NewProduct.SupplierId" class="input">
+                <option value="">-- Välj leverantör --</option>
+                @foreach (var supplier in Suppliers)
+                {
+                    <option value="@supplier.SupplierId">@supplier.CompanyName</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Kvantitet per enhet:</label>
+            <InputText @bind-Value="NewProduct.QuantityPerUnit" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label>Pris:</label>
+            <InputNumber @bind-Value="NewProduct.UnitPrice" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label>I lager:</label>
+            <InputNumber @bind-Value="NewProduct.UnitsInStock" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label>På beställning:</label>
+            <InputNumber @bind-Value="NewProduct.UnitsOnOrder" class="input" />
+        </div>
+
+        <div class="form-group">
+            <label>Beställningsgräns:</label>
+            <InputNumber @bind-Value="NewProduct.ReorderLevel" class="input" />
+        </div>
+
+        <div class="form-group checkbox">
+            <label>Utgått:</label>
+            <InputCheckbox @bind-Value="NewProduct.Discontinued" />
+        </div>
+
+        <button type="submit" class="submit-btn">Skapa produkt</button>
+    </EditForm>
+
+    @if (ResultMessage != null)
+    {
+        <p class="result-msg">@ResultMessage</p>
+    }
+</section>
+
+<style>
+    .create-product-form {
+        max-width: 600px;
+        margin: 2rem auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+        .create-product-form h2 {
+            text-align: center;
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+    .input {
+        width: 100%;
+        padding: 0.6rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    .checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 0.7rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        display: block;
+        margin: 1.5rem auto 0;
+    }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+    .result-msg {
+        margin-top: 1.5rem;
+        text-align: center;
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .validation-summary {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        border-radius: 10px;
+        color: #856404;
+    }
+
+        .validation-summary ul {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+
+        .validation-summary li {
+            margin-bottom: 0.5rem;
+        }
+</style>
+
+@if (ResultMessage != null)
+{
+    <p>@ResultMessage</p>
+}
+
+@code {
+    public ProductCreateViewModel NewProduct { get; set; } = new();
+    public string? ResultMessage;
+    public List<CategoryViewModel> Categories { get; set; } = new();
+    public List<SupplierViewModel> Suppliers { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Categories = await HttpClient.GetFromJsonAsync<List<CategoryViewModel>>("https://localhost:7079/api/Category");
+    }
+    private async Task HandleValidSubmit()
+    {
+        var response = await HttpClient.PostAsJsonAsync("https://localhost:7079/api/Product", NewProduct);
+        if (response.IsSuccessStatusCode)
+        {
+            ResultMessage = "Product created successfully!";
+            NewProduct = new(); // Återställ formuläret
+        }
+        else
+        {
+            ResultMessage = "Error creating product.";
+        }
+    }
+}

@@ -1,6 +1,6 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Northwind.Client</a>
+        <a class="navbar-brand" href="">Northwind Products</a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -16,7 +16,22 @@
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="product">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Product
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Show Product
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="products">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Show All Products
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="create-product">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Add New Product
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="edit-product">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Edit Product
             </NavLink>
         </div>
     </nav>

@@ -1,0 +1,164 @@
+﻿@page "/edit-product"
+@using Northwind.Client.ViewModels
+@inject HttpClient HttpClient
+
+<section class="product-form">
+    <h3>Edit Product</h3>
+
+    <EditForm Model="ProductToEdit" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            <label>Product Name:</label>
+            <InputText @bind-Value="ProductToEdit.ProductName" />
+        </div>
+        <div>
+            <label>Category:</label>
+            <select @bind="ProductToEdit.CategoryId">
+                <option value="">-- Select Category --</option>
+                @foreach (var category in Categories)
+                {
+                    <option value="@category.CategoryId">@category.CategoryName</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label>Supplier:</label>
+            <select @bind="ProductToEdit.SupplierId">
+                <option value="">-- Select Supplier --</option>
+                @foreach (var supplier in Suppliers)
+                {
+                    <option value="@supplier.SupplierId">@supplier.CompanyName</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label>Quantity Per Unit:</label>
+            <InputText @bind-Value="ProductToEdit.QuantityPerUnit" />
+        </div>
+        <div>
+            <label>Unit Price:</label>
+            <InputNumber @bind-Value="ProductToEdit.UnitPrice" />
+        </div>
+        <div>
+            <label>Units In Stock:</label>
+            <InputNumber @bind-Value="ProductToEdit.UnitsInStock" />
+        </div>
+        <div>
+            <label>Units On Order:</label>
+            <InputNumber @bind-Value="ProductToEdit.UnitsOnOrder" />
+        </div>
+        <div>
+            <label>Reorder Level:</label>
+            <InputNumber @bind-Value="ProductToEdit.ReorderLevel" />
+        </div>
+        <div>
+            <label>Discontinued:</label>
+            <InputCheckbox @bind-Value="ProductToEdit.Discontinued" />
+        </div>
+
+        <button type="submit">Update Product</button>
+    </EditForm>
+
+    @if (!string.IsNullOrEmpty(ResultMessage))
+    {
+        <p>@ResultMessage</p>
+    }
+</section>
+
+<style>
+    .product-form {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+        .product-form h3 {
+            font-size: 1.6rem;
+            color: #333;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .product-form div {
+            margin-bottom: 1rem;
+        }
+
+        .product-form label {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .product-form input, .product-form select {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .product-form button {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1.1rem;
+            color: white;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            .product-form button:hover {
+                background-color: #0056b3;
+            }
+
+        .product-form p {
+            text-align: center;
+            color: #555;
+        }
+</style>
+
+@code {
+    [Parameter] public int productId { get; set; }
+    public ProductCreateViewModel ProductToEdit { get; set; } = new();
+    public string? ResultMessage;
+    public List<CategoryViewModel> Categories { get; set; } = new();
+    public List<SupplierViewModel> Suppliers { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Categories = await HttpClient.GetFromJsonAsync<List<CategoryViewModel>>("https://localhost:7079/api/Category");
+        Suppliers = await HttpClient.GetFromJsonAsync<List<SupplierViewModel>>("https://localhost:7079/api/Supplier");
+
+        var productResponse = await HttpClient.GetFromJsonAsync<ProductCreateViewModel>($"https://localhost:7079/api/Product/{productId}");
+        if (productResponse != null)
+        {
+            ProductToEdit = productResponse;  // Fyll formuläret med produktens data
+        }
+        else
+        {
+            ResultMessage = "Product not found!";
+        }
+    }
+
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await HttpClient.PutAsJsonAsync($"https://localhost:7079/api/Product/{productId}", ProductToEdit);
+        if (response.IsSuccessStatusCode)
+        {
+            ResultMessage = "Product updated successfully!";
+        }
+        else
+        {
+            ResultMessage = "Error updating product.";
+        }
+    }
+}

@@ -11,20 +11,19 @@ namespace Northwind.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+            
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            /*Initiera NorthwindContext(dbContext) för Dependency Injection*/
             builder.Services.AddDbContext<NorthwindContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("NorthwindContext"));
             });
 
             builder.Services.AddScoped<IProductService,ProductService>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ISupplierService, SupplierService>();
 
             builder.Services.AddCors(options =>
             {
@@ -40,7 +39,6 @@ namespace Northwind.Api
 
             app.UseCors("AllowBlazorClient");
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

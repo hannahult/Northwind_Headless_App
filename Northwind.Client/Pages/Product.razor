@@ -3,16 +3,24 @@
 @using Northwind.Client.ViewModels
 @inject HttpClient HttpClient
 
-@if (ProductViewModel == null)
-{
-    <p>Loading...</p>
-}
+ @if (ProductViewModel == null)
+    {<section class="product-id-form">
+    <h2>Hämta produktinfo</h2>
+    <div class="input-group">
+        <input type="number" @bind="productId" placeholder="Ange produkt-ID" />
+        <button @onclick="GetProductInfo">Hämta</button>
+    
+    </div>
+        <p>Laddar produkt...</p>
+    
+    </section>
+    }
 else
 {
-    <section class="container">
+    <section class="product-grid">
         <h2>Product Info</h2>
-        <div class="info">
-            <p><strong>Name:</strong> @ProductViewModel.ProductName</p>
+        <div class="product-card">
+            <h3> @ProductViewModel.ProductName</h3>
             <p><strong>Category ID:</strong> @ProductViewModel.CategoryId</p>
             <p><strong>Category Name:</strong> @ProductViewModel.CategoryName</p>
             <p><strong>Supplier ID:</strong> @ProductViewModel.SupplierId</p>
@@ -25,35 +33,114 @@ else
         </div>
     </section>
 }
+<style>
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        padding: 1rem;
+    }
 
+    .product-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        padding: 1.5rem;
+        transition: transform 0.2s ease;
+        font-family: 'Segoe UI', sans-serif;
+    }
 
+        .product-card:hover {
+            transform: translateY(-4px);
+        }
+
+    h3 {
+        margin-top: 0;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    p {
+        margin: 0.3rem 0;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    .product-id-form {
+        max-width: 400px;
+        margin: 2rem auto;
+        padding: 1.5rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        font-family: 'Segoe UI', sans-serif;
+        text-align: center;
+    }
+
+        .product-id-form h2 {
+            font-size: 1.4rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+    .input-group {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+        .input-group input {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            flex: 1;
+        }
+
+        .input-group button {
+            background-color: #007bff;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+            .input-group button:hover {
+                background-color: #0056b3;
+            }
+
+    .product-id-form p {
+        margin-top: 1rem;
+        color: #555;
+    }
+</style>
 
 @code {
 
     public ProductViewModel? ProductViewModel { get; set; }
+    public int productId;
 
-
-    protected override async Task OnInitializedAsync()
+    private async Task GetProductInfo()
     {
-        var id = 1;
-        var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7079/api/Product/{id}");
-        try
+        if (productId > 0)
         {
-            using (var response = await HttpClient.SendAsync(request))
+            var request = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7079/api/Product/{productId}");
+            try
             {
-                response.EnsureSuccessStatusCode();
-                var body = await response.Content.ReadAsStringAsync();
-
-                ProductViewModel = JsonConvert.DeserializeObject<ProductViewModel>(body);
+                using (var response = await HttpClient.SendAsync(request))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var body = await response.Content.ReadAsStringAsync();
+                    ProductViewModel = JsonConvert.DeserializeObject<ProductViewModel>(body);
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.Message.ToString();
             }
         }
-        catch (Exception ex)
-        {
-            ex.Message.ToString();
-        }
     }
-
-
-
-
 }

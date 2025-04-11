@@ -1,0 +1,122 @@
+﻿@page "/products"
+@using Newtonsoft.Json
+@using Northwind.Client.ViewModels
+@inject HttpClient HttpClient
+
+
+@if (ProductList == null)
+{
+    <p style="text-align:center; font-family: 'Segoe UI', sans-serif;">Laddar produkter...</p>
+}
+else
+{
+    <section class="product-grid">
+        <h2>Alla produkter</h2>
+        @foreach (var product in ProductList)
+        {
+            <div class="product-card">
+                <h3>@product.ProductName</h3>
+                <p><strong>Kategori:</strong> @product.CategoryName (ID: @product.CategoryId)</p>
+                <p><strong>Leverantör:</strong> @product.SupplierId</p>
+                <p><strong>Kvantitet per enhet:</strong> @product.QuantityPerUnit</p>
+                <p><strong>Pris:</strong> <span class="price">@product.UnitPrice kr</span></p>
+                <p><strong>I lager:</strong> @product.UnitsInStock</p>
+                <p><strong>På beställning:</strong> @product.UnitsOnOrder</p>
+                <p><strong>Beställningsgräns:</strong> @product.ReorderLevel</p>
+                <p>
+                    <strong>Utgått:</strong>
+                    @if (product.Discontinued)
+                    {
+                        <span class="discontinued">✖ Ja</span>
+                    }
+                    else
+                    {
+                        <span class="available">✔ Nej</span>
+                    }
+                </p>
+            </div>
+        }
+    </section>
+}
+
+<style>
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        padding: 2rem;
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #f7f9fb;
+    }
+
+        .product-grid h2 {
+            grid-column: 1 / -1;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #333;
+            text-align: center;
+        }
+
+    .product-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 14px rgba(0, 123, 255, 0.15);
+        }
+
+        .product-card h3 {
+            margin-top: 0;
+            font-size: 1.3rem;
+            color: #007bff;
+        }
+
+        .product-card p {
+            margin: 0.4rem 0;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .product-card strong {
+            color: #000;
+        }
+
+    .price {
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .discontinued {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .available {
+        color: #28a745;
+        font-weight: bold;
+    }
+</style>
+
+@code {
+    public List<ProductViewModel>? ProductList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await HttpClient.GetAsync("https://localhost:7079/api/Product");
+            response.EnsureSuccessStatusCode();
+            var body = await response.Content.ReadAsStringAsync();
+            ProductList = JsonConvert.DeserializeObject<List<ProductViewModel>>(body);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fel vid hämtning: {ex.Message}");
+        }
+    }
+}

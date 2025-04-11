@@ -1,130 +1,175 @@
-﻿@page "/edit-product"
+﻿@page "/product/edit"
 @using Northwind.Client.ViewModels
 @inject HttpClient HttpClient
 
-<section class="product-form">
-    <h3>Edit Product</h3>
+<section class="create-product-form">
+    <h2>Redigera produkt</h2>
 
-    <EditForm Model="ProductToEdit" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    <div>
+        <label for="productId">Ange produkt-ID:</label>
+        <InputNumber id="productId" @bind-Value="productId" class="input" />
+        <button @onclick="GetProductInfo" class="submit-btn">Hämta produkt</button>
+    </div>
 
-        <div>
-            <label>Product Name:</label>
-            <InputText @bind-Value="ProductToEdit.ProductName" />
-        </div>
-        <div>
-            <label>Category:</label>
-            <select @bind="ProductToEdit.CategoryId">
-                <option value="">-- Select Category --</option>
-                @foreach (var category in Categories)
-                {
-                    <option value="@category.CategoryId">@category.CategoryName</option>
-                }
-            </select>
-        </div>
-        <div>
-            <label>Supplier:</label>
-            <select @bind="ProductToEdit.SupplierId">
-                <option value="">-- Select Supplier --</option>
-                @foreach (var supplier in Suppliers)
-                {
-                    <option value="@supplier.SupplierId">@supplier.CompanyName</option>
-                }
-            </select>
-        </div>
-        <div>
-            <label>Quantity Per Unit:</label>
-            <InputText @bind-Value="ProductToEdit.QuantityPerUnit" />
-        </div>
-        <div>
-            <label>Unit Price:</label>
-            <InputNumber @bind-Value="ProductToEdit.UnitPrice" />
-        </div>
-        <div>
-            <label>Units In Stock:</label>
-            <InputNumber @bind-Value="ProductToEdit.UnitsInStock" />
-        </div>
-        <div>
-            <label>Units On Order:</label>
-            <InputNumber @bind-Value="ProductToEdit.UnitsOnOrder" />
-        </div>
-        <div>
-            <label>Reorder Level:</label>
-            <InputNumber @bind-Value="ProductToEdit.ReorderLevel" />
-        </div>
-        <div>
-            <label>Discontinued:</label>
-            <InputCheckbox @bind-Value="ProductToEdit.Discontinued" />
-        </div>
+    @if (ProductToEdit != null)
+    {
+        <EditForm Model="ProductToEdit" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="validation-summary" />
 
-        <button type="submit">Update Product</button>
-    </EditForm>
+            <div class="form-group">
+                <label>Produktnamn:</label>
+                <InputText @bind-Value="ProductToEdit.ProductName" class="input" />
+            </div>
+
+            <div class="form-group">
+                <label>Kategori:</label>
+                <select @bind="ProductToEdit.CategoryId" class="input">
+                    <option value="">-- Välj kategori --</option>
+                    @foreach (var category in Categories)
+                    {
+                        <option value="@category.CategoryId">@category.CategoryName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Leverantör:</label>
+                <select @bind="ProductToEdit.SupplierId" class="input">
+                    <option value="">-- Välj leverantör --</option>
+                    @foreach (var supplier in Suppliers)
+                    {
+                        <option value="@supplier.SupplierId">@supplier.CompanyName</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Kvantitet per enhet:</label>
+                <InputText @bind-Value="ProductToEdit.QuantityPerUnit" class="input" />
+            </div>
+
+            <div class="form-group">
+                <label>Pris:</label>
+                <InputNumber @bind-Value="ProductToEdit.UnitPrice" class="input" />
+            </div>
+
+            <div class="form-group">
+                <label>I lager:</label>
+                <InputNumber @bind-Value="ProductToEdit.UnitsInStock" class="input" />
+            </div>
+
+            <div class="form-group">
+                <label>På beställning:</label>
+                <InputNumber @bind-Value="ProductToEdit.UnitsOnOrder" class="input" />
+            </div>
+
+            <div class="form-group">
+                <label>Beställningsgräns:</label>
+                <InputNumber @bind-Value="ProductToEdit.ReorderLevel" class="input" />
+            </div>
+
+            <div class="form-group checkbox">
+                <label>Utgått:</label>
+                <InputCheckbox @bind-Value="ProductToEdit.Discontinued" />
+            </div>
+
+            <button type="submit" class="submit-btn">Spara ändringar</button>
+        </EditForm>
+    }
 
     @if (!string.IsNullOrEmpty(ResultMessage))
     {
-        <p>@ResultMessage</p>
+        <p class="result-msg">@ResultMessage</p>
     }
 </section>
 
 <style>
-    .product-form {
+    .create-product-form {
         max-width: 600px;
         margin: 2rem auto;
-        padding: 2rem;
         background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
         font-family: 'Segoe UI', sans-serif;
     }
 
-        .product-form h3 {
+        .create-product-form h2 {
+            text-align: center;
             font-size: 1.6rem;
+            margin-bottom: 1.5rem;
             color: #333;
-            margin-bottom: 1rem;
-            text-align: center;
         }
 
-        .product-form div {
-            margin-bottom: 1rem;
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 600;
+            color: #333;
         }
 
-        .product-form label {
-            font-size: 1rem;
-            font-weight: bold;
+    .input {
+        width: 100%;
+        padding: 0.6rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+    }
+
+    .checkbox {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .submit-btn {
+        background-color: #007bff;
+        color: white;
+        padding: 0.7rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        display: block;
+        margin: 1.5rem auto 0;
+    }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
         }
 
-        .product-form input, .product-form select {
-            width: 100%;
-            padding: 0.5rem;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            margin-top: 0.5rem;
+    .result-msg {
+        margin-top: 1.5rem;
+        text-align: center;
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .validation-summary {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background-color: #fff3cd;
+        border: 1px solid #ffeeba;
+        border-radius: 10px;
+        color: #856404;
+    }
+
+        .validation-summary ul {
+            margin: 0;
+            padding-left: 1.25rem;
         }
 
-        .product-form button {
-            width: 100%;
-            padding: 0.75rem;
-            font-size: 1.1rem;
-            color: white;
-            background-color: #007bff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-            .product-form button:hover {
-                background-color: #0056b3;
-            }
-
-        .product-form p {
-            text-align: center;
-            color: #555;
+        .validation-summary li {
+            margin-bottom: 0.5rem;
         }
 </style>
-
 @code {
     [Parameter] public int productId { get; set; }
     public ProductCreateViewModel ProductToEdit { get; set; } = new();
@@ -147,7 +192,26 @@
             ResultMessage = "Product not found!";
         }
     }
-
+    
+    private async Task GetProductInfo()
+    {
+        if (productId > 0)
+        {
+            var response = await HttpClient.GetFromJsonAsync<ProductCreateViewModel>($"https://localhost:7079/api/Product/{productId}");
+            if (response != null)
+            {
+                ProductToEdit = response;
+            }
+            else
+            {
+                ResultMessage = "Product not found.";
+            }
+        }
+        else
+        {
+            ResultMessage = "Please enter a valid product ID.";
+        }
+    }
 
     private async Task HandleValidSubmit()
     {

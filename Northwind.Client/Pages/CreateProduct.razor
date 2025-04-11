@@ -1,4 +1,4 @@
-﻿@page "/create-product"
+﻿@page "/product/create"
 @using Northwind.Client.ViewModels
 @inject HttpClient HttpClient
 
@@ -176,6 +176,7 @@
     protected override async Task OnInitializedAsync()
     {
         Categories = await HttpClient.GetFromJsonAsync<List<CategoryViewModel>>("https://localhost:7079/api/Category");
+        Suppliers = await HttpClient.GetFromJsonAsync<List<SupplierViewModel>>("https://localhost:7079/api/Supplier");
     }
     private async Task HandleValidSubmit()
     {

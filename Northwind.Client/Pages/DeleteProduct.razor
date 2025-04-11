@@ -1,0 +1,122 @@
+﻿@page "/products/delete"
+@using Newtonsoft.Json
+@using Northwind.Client.ViewModels
+@inject HttpClient HttpClient
+@inject NavigationManager Navigation
+
+<h2 class="text-2xl font-semibold mb-4">Ta bort en produkt</h2>
+
+<div class="mb-4">
+    <label for="productId" class="block mb-1 font-medium">Ange produkt-ID:</label>
+    <input type="number" id="productId" @bind="productId" class="p-2 border rounded w-64" />
+    <button class="ml-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" @onclick="LoadProduct">Hämta produkt</button>
+</div>
+
+@if (product != null)
+{
+    <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 p-4 rounded mb-4">
+        <p><strong>Produktnamn:</strong> @product.ProductName</p>
+        <p><strong>Kategori-ID:</strong> @product.CategoryId</p>
+        <p><strong>Leverantör-ID:</strong> @product.SupplierId</p>
+        <p class="mt-2">Är du säker på att du vill <strong>ta bort</strong> denna produkt?</p>
+        <div class="mt-4">
+            <button class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 mr-2" @onclick="ShowConfirmDialog">Ta bort</button>
+            <button class="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400" @onclick="ResetForm">Avbryt</button>
+        </div>
+    </div>
+}
+
+@if (ShowConfirm)
+{
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded shadow-lg max-w-md text-center">
+            <p class="text-lg font-semibold mb-4">Bekräfta borttagning</p>
+            <p class="mb-4">Vill du verkligen ta bort <strong>@product?.ProductName</strong>?</p>
+            <div class="flex justify-center space-x-4">
+                <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" @onclick="DeleteProduct">Ja, ta bort</button>
+                <button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @onclick="() => ShowConfirm = false">Nej, avbryt</button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(ResultMessage))
+{
+    <div class="mt-4 p-3 rounded text-white" style="background-color:@MessageColor">
+        @ResultMessage
+    </div>
+}
+
+
+@code {
+    [Parameter] public int productId { get; set; }
+    private ProductViewModel? product;
+    private string? ResultMessage;
+    private string MessageColor = "green";
+    private bool ShowConfirm = false;
+
+    private async Task LoadProduct()
+    {
+        ResultMessage = string.Empty;
+        ShowConfirm = false;
+        product = null;
+
+        try
+        {
+            product = await HttpClient.GetFromJsonAsync<ProductViewModel>($"https://localhost:7079/api/Product/{ProductId}");
+            if (product == null)
+            {
+                ResultMessage = "Produkten kunde inte hittas.";
+                MessageColor = "orange";
+            }
+        }
+        catch (Exception ex)
+        {
+            ResultMessage = $"Fel vid hämtning: {ex.Message}";
+            MessageColor = "red";
+        }
+    }
+
+    private void ShowConfirmDialog()
+    {
+        ShowConfirm = true;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            product = await HttpClient.GetFromJsonAsync<ProductViewModel>($"https://localhost:7079/api/Product/{productId}");
+        }
+        catch (Exception ex)
+        {
+            ResultMessage = $"Fel vid hämtning av produkt: {ex.Message}";
+        }
+    }
+
+    private async Task Delete()
+    {
+        var response = await HttpClient.DeleteAsync($"https://localhost:7079/api/Product/{productId}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            ResultMessage = "Produkten har tagits bort.";
+            MessageColor = "green";
+            await Task.Delay(1000);
+            Navigation.NavigateTo("/products");
+        }
+        else
+        {
+            ResultMessage = $"Misslyckades att ta bort: {response.StatusCode}";
+            MessageColor = "red";
+        }
+        ResetForm();
+    }
+    private void ResetForm()
+    {
+        product = null;
+        productId = 0;
+        ResultMessage = string.Empty;
+        ShowConfirm = false;
+    }
+}

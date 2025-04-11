@@ -22,15 +22,6 @@ namespace Northwind.Api.Controllers
             _productService = productService;
         }
 
-
-        /* Vi har valt att använda DTOs för att separera våra databasentiteter från våra modeller.
-         Detta är en vanlig practise för att undvika att fel information visas för användaren och att säkerställa 
-        att endast korrekt data läggs in i vår databas. Det kan dock se lite fult ut och bryter ju mot konceptet med tight coupling!
-        Vi skulle därför om vi ville kunna skapa en Factory eller använda verktyg som Mapster eller automapper 
-        för att slippa manuellt konvertera objekt på detta sättet i vår controller eller andra lager.*/
-
-
-        // GET: api/<ProductController>
         [HttpGet]
         public async Task<ActionResult<List<ProductReadDTO>>> GetAll()
         {
@@ -58,7 +49,6 @@ namespace Northwind.Api.Controllers
             return Ok(productDtos);
         }
 
-        // GET api/<ProductController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductReadDTO>> Get(int id)
         {
@@ -86,7 +76,6 @@ namespace Northwind.Api.Controllers
             return Ok(productDto);
         }
 
-        // POST api/<ProductController>
         [HttpPost]
         public async Task<ActionResult> Post(ProductCreateDTO productDto)
         {
@@ -118,7 +107,6 @@ namespace Northwind.Api.Controllers
             return BadRequest();
         }
 
-        // PUT api/<ProductController>/5
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, ProductCreateDTO productDto) //ProductUpdateDTO ??? Kanske mer cleant, men vi skippar det här. 
         {
@@ -141,8 +129,6 @@ namespace Northwind.Api.Controllers
             return NoContent();
         }
 
-
-        // DELETE api/<ProductController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

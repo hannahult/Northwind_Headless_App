@@ -1,4 +1,4 @@
-﻿@page "/products/delete"
+﻿@page "/product/delete"
 @using Newtonsoft.Json
 @using Northwind.Client.ViewModels
 @inject HttpClient HttpClient
@@ -33,7 +33,7 @@
             <p class="text-lg font-semibold mb-4">Bekräfta borttagning</p>
             <p class="mb-4">Vill du verkligen ta bort <strong>@product?.ProductName</strong>?</p>
             <div class="flex justify-center space-x-4">
-                <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" @onclick="DeleteProduct">Ja, ta bort</button>
+                <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" @onclick="Delete">Ja, ta bort</button>
                 <button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @onclick="() => ShowConfirm = false">Nej, avbryt</button>
             </div>
         </div>
@@ -63,7 +63,7 @@
 
         try
         {
-            product = await HttpClient.GetFromJsonAsync<ProductViewModel>($"https://localhost:7079/api/Product/{ProductId}");
+            product = await HttpClient.GetFromJsonAsync<ProductViewModel>($"https://localhost:7079/api/Product/{productId}");
             if (product == null)
             {
                 ResultMessage = "Produkten kunde inte hittas.";
@@ -103,7 +103,7 @@
             ResultMessage = "Produkten har tagits bort.";
             MessageColor = "green";
             await Task.Delay(1000);
-            Navigation.NavigateTo("/products");
+            Navigation.NavigateTo("/");
         }
         else
         {

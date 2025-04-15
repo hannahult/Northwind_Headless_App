@@ -1,23 +1,45 @@
-﻿@page "/products/show-all"
+﻿@page "/product/show-all"
 @using Newtonsoft.Json
 @using Northwind.Client.ViewModels
 @inject HttpClient HttpClient
 
+<div class="filters">
+    <label>
+        Kategori:
+        <select @bind="selectedCategoryId">
+            <option value="">Alla</option>
+            @foreach (var category in categories)
+            {
+                <option value="@category.CategoryId">@category.CategoryName</option>
+            }
+        </select>
+    </label>
+
+    <label>
+        Leverantör:
+        <select @bind="selectedSupplierId">
+            <option value="">Alla</option>
+            @foreach (var supplier in suppliers)
+            {
+                <option value="@supplier.SupplierId">@supplier.CompanyName</option>
+            }
+        </select>
+    </label>
+</div>
 
 @if (ProductList == null)
 {
-    <p style="text-align:center; font-family: 'Segoe UI', sans-serif;">Laddar produkter...</p>
+    <p>Laddar produkter...</p>
 }
 else
 {
     <section class="product-grid">
-        <h2>Alla produkter</h2>
-        @foreach (var product in ProductList)
+        @foreach (var product in filteredProducts)
         {
             <div class="product-card">
                 <h3>@product.ProductName</h3>
-                <p><strong>Kategori:</strong> @product.CategoryName (ID: @product.CategoryId)</p>
-                <p><strong>Leverantör:</strong> @product.SupplierId</p>
+                <p><strong>Kategori:</strong>@GetCategoryName(product.CategoryId)</p>
+                <p><strong>Leverantör:</strong>@GetSupplierName(product.SupplierId)</p>
                 <p><strong>Kvantitet per enhet:</strong> @product.QuantityPerUnit</p>
                 <p><strong>Pris:</strong> <span class="price">@product.UnitPrice kr</span></p>
                 <p><strong>I lager:</strong> @product.UnitsInStock</p>
@@ -27,11 +49,11 @@ else
                     <strong>Utgått:</strong>
                     @if (product.Discontinued)
                     {
-                        <span class="discontinued">✖ Ja</span>
+                        <span class="discontinued">Ja</span>
                     }
                     else
                     {
-                        <span class="available">✔ Nej</span>
+                        <span class="available">Nej</span>
                     }
                 </p>
             </div>
@@ -39,23 +61,37 @@ else
     </section>
 }
 
+}
+
 <style>
+    .filters {
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 2rem;
+        justify-content: center;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+        .filters label {
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .filters select {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
     .product-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 1.5rem;
         padding: 2rem;
-        font-family: 'Segoe UI', sans-serif;
         background-color: #f7f9fb;
     }
-
-        .product-grid h2 {
-            grid-column: 1 / -1;
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-            color: #333;
-            text-align: center;
-        }
 
     .product-card {
         background: #ffffff;
@@ -102,8 +138,15 @@ else
     }
 </style>
 
-@code {
+@code{
     public List<ProductViewModel>? ProductList { get; set; }
+    public List<ProductViewModel>? filteredProducts { get; set; }
+
+    public List<CategoryViewModel> categories { get; set; } = new List<CategoryViewModel>();
+    public List<SupplierViewModel> suppliers { get; set; } = new List<SupplierViewModel>();
+
+    public int? selectedCategoryId { get; set; } = null;
+    public int? selectedSupplierId { get; set; } = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -113,10 +156,52 @@ else
             response.EnsureSuccessStatusCode();
             var body = await response.Content.ReadAsStringAsync();
             ProductList = JsonConvert.DeserializeObject<List<ProductViewModel>>(body);
+
+            var categoryResponse = await HttpClient.GetAsync("https://localhost:7079/api/Category");
+            categoryResponse.EnsureSuccessStatusCode();
+            var categoryBody = await categoryResponse.Content.ReadAsStringAsync();
+            categories = JsonConvert.DeserializeObject<List<CategoryViewModel>>(categoryBody);
+
+            var supplierResponse = await HttpClient.GetAsync("https://localhost:7079/api/Supplier");
+            supplierResponse.EnsureSuccessStatusCode();
+            var supplierBody = await supplierResponse.Content.ReadAsStringAsync();
+            suppliers = JsonConvert.DeserializeObject<List<SupplierViewModel>>(supplierBody);
+
+            filteredProducts = ProductList;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Fel vid hämtning: {ex.Message}");
         }
     }
+
+    private void ApplyFilters()
+    {
+        filteredProducts = ProductList;
+
+        if (selectedCategoryId.HasValue)
+        {
+            filteredProducts = filteredProducts.Where(p => p.CategoryId == selectedCategoryId).ToList();
+        }
+
+        if (selectedSupplierId.HasValue)
+        {
+            filteredProducts = filteredProducts.Where(p => p.SupplierId == selectedSupplierId).ToList();
+        }
+
+        StateHasChanged();
+    }
+
+    private string GetCategoryName(int categoryId)
+    {
+        var category = categories.FirstOrDefault(c => c.CategoryId == categoryId);
+        return category?.CategoryName ?? "Okänd kategori";
+    }
+
+    private string GetSupplierName(int supplierId)
+    {
+        var supplier = suppliers.FirstOrDefault(s => s.SupplierId == supplierId);
+        return supplier?.CompanyName ?? "Okänd leverantör";
+    }
+}
 }

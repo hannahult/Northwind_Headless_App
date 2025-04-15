@@ -1,7 +1,104 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<h3 class="text-2xl font-semibold mb-4">Välkommen till Northwindportalen</h3>
 
-<h1>Welcome to Northwind Products!</h1>
+<div class="button-grid">
+    <NavLink class="nav-button show" href="product/show">Visa produkt</NavLink>
+    <NavLink class="nav-button show-all" href="product/show-all">Visa alla produkter</NavLink>
 
-<p>Choose what you want to do</p>
+    <NavLink class="nav-button create" href="product/create">Lägg till Produkt</NavLink>
+    <NavLink class="nav-button edit" href="product/edit">Redigera Produkt info</NavLink>
+</div>
+
+<div class="delete-wrapper">
+    <NavLink class="nav-button delete" href="product/delete">Ta bort produkt</NavLink>
+</div>
+
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .button-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .delete-wrapper {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    .nav-button {
+        display: inline-block;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-button:hover {
+        transform: translateY(-2px);
+    }
+
+    .nav-button:active {
+        transform: translateY(0);
+    }
+
+ 
+    .nav-button.show {
+        background-color: #60a5fa;
+    }
+
+    .nav-button.show:hover {
+        background-color: #3b82f6;
+    }
+
+    .nav-button.show-all {
+        background-color: #34d399; 
+    }
+
+    .nav-button.show-all:hover {
+        background-color: #10b981;
+    }
+
+    .nav-button.create {
+        background-color: #fbbf24; 
+    }
+
+    .nav-button.create:hover {
+        background-color: #f59e0b;
+    }
+
+    .nav-button.edit {
+        background-color: #c084fc; 
+    }
+
+    .nav-button.edit:hover {
+        background-color: #a855f7;
+    }
+
+    .nav-button.delete {
+        background-color: #f87171; 
+    }
+
+    .nav-button.delete:hover {
+        background-color: #ef4444;
+    }
+</style>
